@@ -99,15 +99,15 @@
             // Check time restrictions based on the day of the week
             if (
                 // MON-THUR (7:30am - 10:30pm)
-                (dayOfWeek >= 1 && dayOfWeek <= 4 && (hour < 7 || hour > 22)) ||
+                (dayOfWeek >= 1 && dayOfWeek <= 4 && (hour < 7 || (hour == 7 && minute == 0) || hour > 22)) ||
                 // FRIDAY (7:30am - 6:30pm)
-                (dayOfWeek === 5 && (hour < 7 || hour > 18)) ||
+                (dayOfWeek === 5 && (hour < 7 || (hour == 7 && minute == 0) || hour > 18)) ||
                 // SAT (10:30am - 5:30pm)
                 (dayOfWeek === 6 && (hour < 10 || hour > 17)) ||
                 // SUN (12:00pm - 10:30pm)
                 (dayOfWeek === 0 && (hour < 12 || hour > 22))
             ) {
-                alert("Selected Start time is outside the allowed time range for the selected date, refer to the time ranges below:\n\nMON-THUR (7:30am - 10:30pm)\nFRIDAY (7:30am - 6:30pm)\nSAT (10:30am - 5:30pm)\nSUN (12:00pm - 10:30pm)\n");
+                alert("Selected Start time is outside the allowed time range for the selected date, refer to the time ranges below:\n\nMON-THUR (7:30am - 10:30pm)\nFRIDAY (7:30am - 6:30pm)\nSAT (10:00am - 5:30pm)\nSUN (12:00pm - 10:30pm)\n");
                 return false; // Prevent form submission
             }
             if (
@@ -120,7 +120,7 @@
                 // SUN (12:00pm - 10:30pm)
                 (dayOfWeek === 0 &&  hourPOST >= 23 && (minutePOST  >= 30 || hourPOST > 23))
             ) {
-                alert("Duration of reservation exceeds library closing time, refer to the time ranges below:\n\nMON-THUR (7:30am - 10:30pm)\nFRIDAY (7:30am - 6:30pm)\nSAT (10:30am - 5:30pm)\nSUN (12:00pm - 10:30pm)\n");
+                alert("Duration of reservation exceeds library closing time, refer to the time ranges below:\n\nMON-THUR (7:30am - 10:30pm)\nFRIDAY (7:30am - 6:30pm)\nSAT (10:00am - 5:30pm)\nSUN (12:00pm - 10:30pm)\n");
                 return false; // Prevent form submission
             }
             return true; // Allow form submission
