@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Reservation Form</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Library Reservation Form</h1>
+
+    <form action="/task_enqueue" method="POST" onsubmit="return validateForm()">
+        <label for="input1">Username:</label>
+        <input type="text" id="input1" name="input1" value="{{ username }}" required>
+        <br><br>
+        <label for="input2">Password:</label>
+        <input type="password" id="input2" name="input2" value="{{ password }}" required>
+        <br><br>
+        <label for="input3">Date:</label>
+        <input type="date" id="input3" name="input3" required>
+        <br><br>
+        <label for="input4">Start Time (30 min Intervals):</label>
+        <input type="time" id="input4" name="input4" step="1800" required>
+        <br><br>
+        <label for="input5">Duration In Hours:</label>
+        <input type="number" id="input5" name="input5" min="0.5" max="4" step="0.5" required>
+        <br><br>
+        <label for="input6">Reservation Type:</label>
+        <select id="input6" name="input6">
+            <option value="specific" selected>By Specific Room</option>
+            <option value="group">By Groups of Rooms</option>
+        </select>
+        <br><br>
+        <div id="room-selection">
+            <div id="room-options">
+                <input type="radio" id="option-100s" name="room-option" value="100s">
+                <label for="option-100s">100s</label>
+                <input type="radio" id="option-300s" name="room-option" value="300s">
+                <label for="option-300s">300s</label>
+                <input type="radio" id="option-400s" name="room-option" value="400s">
+                <label for="option-400s">400s</label>
+            </div>
+            <label for="input8">Minimum Capacity:</label>
+            <input type="number" id="input8" name="input8" min="1" max = "12" placeholder = "Optional">
+            <br><br>
+        </div>
+        <div id="specific-selection">
+            <label for="input7">Room Number:</label>
+            <input type="text" id="input7" name="input7" placeholder="Enter Room Number" pattern="171|173|174|177|178|179|172|176|360A|360B|360C
+                                                                                                 |360D|360E|360J|360K|360L|360M|360N|380|371|372|
+                                                                                                 373|377|378|379|386|387|388|389|381|370A|370B|426
+                                                                                                 |425|429|430|431|432|407|406|434" required>
+            <br><br>
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+    
+    <script>
+        //Min Date and time Step
+        const inputDate = document.getElementById("input3");
+        
+        const timeInput = document.getElementById("input4");
+        timeInput.step = 1800;
+        
+        const roomTypeSelect = document.getElementById('input6');
+        const roomSelectionDiv = document.getElementById('room-selection');
+        const specificSelectionDiv = document.getElementById('specific-selection');
+        //Intial load 
+        roomSelectionDiv.style.display = 'none';
+        specificSelectionDiv.style.display = 'block';
+        // Show/hide room selection based on room type
+        roomTypeSelect.addEventListener('change', function() {
+            if (this.value === 'group') {
+                roomSelectionDiv.style.display = 'block';
+                specificSelectionDiv.style.display = 'none';
+            } else {
+                roomSelectionDiv.style.display = 'none';
+                specificSelectionDiv.style.display = 'block';
+            }
+        });
+
+        function validateForm() {
+            const dateInput = document.getElementById("input3");
+            const timeInput = document.getElementById("input4");
+
+            const selectedDate = new Date(`${dateInput.value}T${timeInput.value}`);
+            const dayOfWeek = selectedDate.getDay();
+            const hour = selectedDate.getHours();
+            const minute = selectedDate.getMinutes();
+            const duration = document.getElementById("input5").value * 2  * 30;
+
+            hourPOST = selectedDate.getHours() + parseInt(duration/60); 
+            minutePOST = selectedDate.getMinutes() + parseInt(duration%60);
+            if(minutePOST%60 === 0){ hourPOST++; minutePOST = 0;}
+
+            const currentDate = new Date();
+            if (selectedDate < currentDate) {
+                alert("Selected date and time must be in the future.");
+                return false; // Prevent form submission
+            }
+            // Check time restrictions based on the day of the week
+            if (
+                // MON-THUR (7:30am - 10:30pm)
+                (dayOfWeek >= 1 && dayOfWeek <= 4 && (hour < 7 || hour > 22)) ||
+                // FRIDAY (7:30am - 6:30pm)
+                (dayOfWeek === 5 && (hour < 7 || hour > 18)) ||
+                // SAT (10:30am - 5:30pm)
+                (dayOfWeek === 6 && (hour < 10 || hour > 17)) ||
+                // SUN (12:00pm - 10:30pm)
+                (dayOfWeek === 0 && (hour < 12 || hour > 22))
+            ) {
+                alert("Selected Start time is outside the allowed time range for the selected date, refer to the time ranges below:\n\nMON-THUR (7:30am - 10:30pm)\nFRIDAY (7:30am - 6:30pm)\nSAT (10:30am - 5:30pm)\nSUN (12:00pm - 10:30pm)\n");
+                return false; // Prevent form submission
+            }
+            if (
+                // MON-THUR (7:30am - 10:30pm)
+                (dayOfWeek >= 1 && dayOfWeek <= 4 &&  hourPOST >= 23 && (minutePOST  >= 30 || hourPOST > 23)) ||
+                // FRIDAY (7:30am - 6:30pm)
+                (dayOfWeek === 5 &&  hourPOST >= 19 && (minutePOST >= 30  || hourPOST > 19 )) ||
+                // SAT (10:30am - 5:30pm)
+                (dayOfWeek === 6 &&  hourPOST >= 18 && (minutePOST  >= 30 || hourPOST > 18)) ||
+                // SUN (12:00pm - 10:30pm)
+                (dayOfWeek === 0 &&  hourPOST >= 23 && (minutePOST  >= 30 || hourPOST > 23))
+            ) {
+                alert("Duration of reservation exceeds library closing time, refer to the time ranges below:\n\nMON-THUR (7:30am - 10:30pm)\nFRIDAY (7:30am - 6:30pm)\nSAT (10:30am - 5:30pm)\nSUN (12:00pm - 10:30pm)\n");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
+    </script>
+</body>
+</html>

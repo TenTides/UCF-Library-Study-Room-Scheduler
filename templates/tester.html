@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form Submission Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: auto;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Form Submission Test</h1>
+
+    <table>
+        <tr>
+            <th>Username</th>
+            <td>{{ username }}</td>
+        </tr>
+        <tr>
+            <th>Password</th>
+            <td>{{ password }}</td>
+        </tr>
+        <tr>
+            <th>Date</th>
+            <td>{{ date }}</td>
+        </tr>
+        <tr>
+            <th>Start Time</th>
+            <td>{{ start_time }}</td>
+        </tr>
+        <tr>
+            <th>Duration</th>
+            <td>{{ duration }}</td>
+        </tr>
+        <tr>
+            <th>Reservation Type</th>
+            <td>{{ reservation_type }}</td>
+        </tr>
+        <tr>
+            <th>Minimum Capacity</th>
+            <td>{{ min_capacity }}</td>
+        </tr>
+        <tr>
+            <th>Room Option</th>
+            <td>{{ room_option }}</td>
+        </tr>
+    </table>
+</body>
+</html>
