@@ -146,12 +146,11 @@ class StudyRoomBooker:
     def book_room(self, room, startTime, duration):
         self.start_timeCheck(self, room, startTime)
         self.select_durationCheck(self,duration)
-        
-        
 
+    # Returns the room with the greatest positive capacity difference then the user specified mincapacity   
     def rand_room(self, room_group, min_capacity):
         roomGroupDict = self.rooms[int(room_group[0]) // 2]
-        chosenRoom = ""
+        chosenRoom = "NULL"
         for key, value in roomGroupDict.items():
              if value >= min_capacity: 
                  chosenRoom = key

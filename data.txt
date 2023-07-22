@@ -1,4 +1,4 @@
-username,password
+username,password,UCFID
 Jobs:
 time_task_was_queued, desired_schedule_date, time_of_reservation, duration_of_stay
 time_task_was_queued, desired_schedule_date, time_of_reservation, duration_of_stay

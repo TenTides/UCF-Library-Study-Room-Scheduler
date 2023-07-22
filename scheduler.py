@@ -5,6 +5,11 @@ import csv
 import scraperModule
 
 app = Flask(__name__)
+# TODO  
+# -Redis or RabbitMQ to be the redis broker
+# -Minheap to schedule new tasks that are valid from data file
+#  based on date of when the appointment is to be scheduled
+# -Connection between headless scraper module and flask form        
 app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
 app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
 
@@ -13,6 +18,7 @@ celery.conf.update(app.config)
 
 username = ""
 password = ""
+ucfID = ""
 tasks = []
 
 # def load_tasks():
@@ -39,20 +45,22 @@ def valid_task():
     min_capacity = request.form.get('input7')
     room_option = request.form.get('room-option')
     min_capacity = request.form.get('input8')
+    ucfID = request.form.get('input9')
+
 
     return render_template('tester.html', username=username,password=password, start_time=start_time,
                             duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
-                            date=date, room_option=room_option)
+                            date=date, room_option=room_option, ucfID = ucfID)
 
 def process_file():
-    global username,password,tasks
+    global username,password,tasks,ucfID
     with open('data.txt', 'r') as file:
         reader = csv.reader(file)
         for row in reader:
             if row:
                 if row[0] == 'Jobs:':
                     break  # Stop reading when tasks section is encountered
-                username, password = row
+                username, password,ucfID = row
                 # Process username and password 
             if len(row) == 4:
                 tasks.append(row)  # Store the task data
@@ -64,7 +72,7 @@ def process_file():
 @app.route('/')
 def index():
     process_file()
-    # Schedule the task and save it to the file
+
     #task_name = 'task3'
     # task_schedule = datetime.datetime.now() + datetime.timedelta(seconds=10)
     # task_data = 'task3_data'
@@ -72,7 +80,7 @@ def index():
     #     file.write(f"{task_name},{task_schedule.strftime('%Y-%m-%d %H:%M:%S')},{task_data}\n")
     # schedule_task.apply_async(args=[task_name, task_data], eta=task_schedule)
 
-    return render_template('index.html',username = username, password = password)
+    return render_template('index.html',username = username, password = password, ucfID = ucfID)
 
 if __name__ == '__main__':
     # load_tasks()  # Load tasks from the file on Flask server startup
