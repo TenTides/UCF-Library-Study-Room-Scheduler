@@ -113,7 +113,7 @@ class StudyRoomBooker:
         relevant_day = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, td_element_xpath)))
         self.safe_click(relevant_day)
 
-    def book_room(self, room, startTime, duration):
+    def start_timeCheck(self, room, startTime):
         hour = int(startTime[0:2])
         startTime = startTime[2:] + ("pm" if hour >= 12 else "am")
         hour = hour if hour < 12 else hour - 12
@@ -125,10 +125,13 @@ class StudyRoomBooker:
         relevantStartElement =  WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, relevantStartElementPath)))
         self.driver.execute_script("arguments[0].scrollIntoView();", relevantStartElement)
 
-        #TODO
         if not self.safe_click(relevantStartElement):
             print("room for that time is already booked")
-            return
+            return False
+        else:
+            return True
+        
+    def select_durationCheck(self, duration):
         selsect_elementPath = '//*[@id="bookingend_1"]'
         select_element = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, selsect_elementPath)))
         self.driver.execute_script("arguments[0].scrollIntoView();", select_element)
@@ -137,7 +140,14 @@ class StudyRoomBooker:
         try:
             select.select_by_index(int(duration*2-1))
         except Exception as e: # can be circumvented if an additional parameter is addded to the html that takes 
-            return             # a strict val boolean, which autofills for the closest possible appointment at that start time
+            return False       # a strict val boolean, which autofills for the closest possible appointment at that start time
+        return True
+
+    def book_room(self, room, startTime, duration):
+        self.start_timeCheck(self, room, startTime)
+        self.select_durationCheck(self,duration)
+        
+        
 
     def rand_room(self, room_group, min_capacity):
         roomGroupDict = self.rooms[int(room_group[0]) // 2]
@@ -148,6 +158,61 @@ class StudyRoomBooker:
                  min_capacity = value
         return chosenRoom
 
+    def login_sequence(self, username, password,UCFID):
+        #can only be called after first appointment is made on a single instance
+
+        #Infalible, will always execute successfully
+        submit_dXpath = '//*[@id="submit_times"]'
+        button1 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_dXpath)))
+        self.driver.execute_script("arguments[0].scrollIntoView();", button1)
+        self.safe_click(submit_dXpath)
+        
+        username_input = self.driver.find_element(By.ID,"userNameInput")
+        password_input = self.driver.find_element(By.ID,"passwordInput")
+        # Enter the username and password using send_keys method
+        username_input.send_keys(f"{username}")
+        password_input.send_keys(f"{password}")
+
+        #Infalible, will always execute successfully
+        submit_pXpath = '//*[@id="submitButton"]'
+        button2 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_pXpath)))
+        self.driver.execute_script("arguments[0].scrollIntoView();", button2)
+        self.safe_click(submit_pXpath)
+
+    def confirm_booking(self, username, password,UCFID):
+        # Check for if the password and username is correct here as this element won't be visable if it is wrong
+        # makes for an easy check and confirmation rather than using a redirect detection or X path query
+        try:
+            submit_fXpath  = '//*[@id="terms_accept"]'
+            button3 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_fXpath)))
+            self.driver.execute_script("arguments[0].scrollIntoView();", button3)
+            self.safe_click(submit_fXpath)
+        except Exception as e:
+            return "Incorrect Username or Password"
+
+        #Infalible, will always execute successfully
+        nick_input = self.driver.find_element(By.ID,"nick")
+        UCFID_input = self.driver.find_element(By.ID,"q2614")
+        name_element = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="s-lc-eq-bform"]/fieldset/div[2]/div[2]/p'))).text
+        nick_input.send_keys(f"{name_element}")
+        UCFID_input.send_keys(f"{UCFID}")
+
+        #Infalible will always execute successfully
+        selsect_statusPath = '//*[@id="q2613"]'
+        select_element = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, selsect_statusPath)))
+        self.driver.execute_script("arguments[0].scrollIntoView();", select_element)
+        select = Select(select_element)
+        select.select_by_index(1)
+    
+        submit_final_Button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="btn-form-submit"]')))
+        self.safe_click(submit_final_Button)
+
+        try:
+            success = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="s-lc-public-page-content"]/div/h1')))
+        except Exception as e:
+            return "Incorrect/Invalid UCFID"
+
+        self.driver.get("https://ucf.libcal.com/reserve/generalstudyroom")
     def close(self):
         self.driver.quit()
 
