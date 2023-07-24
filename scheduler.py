@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from celery import Celery
-import datetime
+from datetime import datetime, timedelta
 import csv
 import scraperModule
 
@@ -38,7 +38,6 @@ tasks = []
 def valid_task():
     username = request.form.get('input1')
     password = request.form.get('input2')
-    date = request.form.get('input3')
     start_time = request.form.get('input4')
     duration = request.form.get('input5')
     reservationType = request.form.get('input6') 
@@ -46,8 +45,15 @@ def valid_task():
     room_option = request.form.get('room-option')
     min_capacity = request.form.get('input8')
     ucfID = request.form.get('input9')
-
-
+    
+    queueUp = False
+    date = request.form.get('input3')
+    input_date = datetime.strptime(date, '%Y-%m-%d')
+    current_date = datetime.now()
+    date_difference = input_date - current_date
+    # Check if the difference is greater than or equal to 7 days (a week)
+    if date_difference >= timedelta(days=7):
+        queueUp = True
     return render_template('tester.html', username=username,password=password, start_time=start_time,
                             duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
                             date=date, room_option=room_option, ucfID = ucfID)

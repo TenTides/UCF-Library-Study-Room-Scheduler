@@ -95,7 +95,15 @@
             if(minutePOST%60 === 0){ hourPOST++; minutePOST = 0;}
 
             const currentDate = new Date();
-            if (selectedDate < currentDate) {
+            if (selectedDate >= currentDate) {
+                const millisecondsWeek = (1000 * 60 * 60 * 24 * 7)
+                if((selectedDate - currentDate) >= millisecondsWeek)
+                {
+                    alert("Selected start time is greater than a week away, task will be put in queue upon submission.");
+                }
+            }
+            else 
+            {
                 alert("Selected date and time must be in the future.");
                 return false; // Prevent form submission
             }
