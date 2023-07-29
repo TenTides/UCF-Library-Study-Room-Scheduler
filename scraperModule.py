@@ -10,12 +10,14 @@ from selenium.webdriver.common.action_chains import ActionChains
 class StudyRoomBooker:
     def __init__(self):
         # Set up the Chrome WebDriver
+        self.logged_in = False
         self.service = Service(executable_path=r"./chromedriver/chromedriver.exe")
         self.options = webdriver.ChromeOptions()
         self.options.add_experimental_option("detach", True)
         self.options.add_argument('--headless')
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
         self.driver.get("https://ucf.libcal.com/reserve/generalstudyroom")
+
 
         # Define the room capacity data
         self.rooms = [
@@ -143,9 +145,12 @@ class StudyRoomBooker:
             return False       # a strict val boolean, which autofills for the closest possible appointment at that start time
         return True
 
-    def book_room(self, room, startTime, duration):
+    def book_room(self,username,password,UCFID,date, room, startTime, duration):
+        self.date_change(self, date)
         self.start_timeCheck(self, room, startTime)
         self.select_durationCheck(self,duration)
+        self.login_sequence(self, username, password)
+        self.confirm_booking(self,UCFID)
 
     # Returns the room with the greatest positive capacity difference then the user specified mincapacity   
     def rand_room(self, room_group, min_capacity):
@@ -157,28 +162,29 @@ class StudyRoomBooker:
                  min_capacity = value
         return chosenRoom
 
-    def login_sequence(self, username, password,UCFID):
+    def login_sequence(self, username, password):
         #can only be called after first appointment is made on a single instance
+        if not self.logged_in:
+            #Infalible, will always execute successfully
+            submit_dXpath = '//*[@id="submit_times"]'
+            button1 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_dXpath)))
+            self.driver.execute_script("arguments[0].scrollIntoView();", button1)
+            self.safe_click(submit_dXpath)
+            
+            username_input = self.driver.find_element(By.ID,"userNameInput")
+            password_input = self.driver.find_element(By.ID,"passwordInput")
+            # Enter the username and password using send_keys method
+            username_input.send_keys(f"{username}")
+            password_input.send_keys(f"{password}")
 
-        #Infalible, will always execute successfully
-        submit_dXpath = '//*[@id="submit_times"]'
-        button1 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_dXpath)))
-        self.driver.execute_script("arguments[0].scrollIntoView();", button1)
-        self.safe_click(submit_dXpath)
-        
-        username_input = self.driver.find_element(By.ID,"userNameInput")
-        password_input = self.driver.find_element(By.ID,"passwordInput")
-        # Enter the username and password using send_keys method
-        username_input.send_keys(f"{username}")
-        password_input.send_keys(f"{password}")
+            #Infalible, will always execute successfully
+            submit_pXpath = '//*[@id="submitButton"]'
+            button2 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_pXpath)))
+            self.driver.execute_script("arguments[0].scrollIntoView();", button2)
+            self.safe_click(submit_pXpath)
+            self.logged_in = True
 
-        #Infalible, will always execute successfully
-        submit_pXpath = '//*[@id="submitButton"]'
-        button2 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_pXpath)))
-        self.driver.execute_script("arguments[0].scrollIntoView();", button2)
-        self.safe_click(submit_pXpath)
-
-    def confirm_booking(self, username, password,UCFID):
+    def confirm_booking(self,UCFID):
         # Check for if the password and username is correct here as this element won't be visable if it is wrong
         # makes for an easy check and confirmation rather than using a redirect detection or X path query
         try:
@@ -218,5 +224,4 @@ class StudyRoomBooker:
 if __name__ == "__main__": # only executed when run directly from scraperModule.py
     booker = StudyRoomBooker()
     booker.date_change("2023-07-22")
-    booker.book_room("434", "10:00", 3.5)
     booker.close()

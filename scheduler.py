@@ -1,93 +1,142 @@
-from flask import Flask, render_template, request
-from celery import Celery
+from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime, timedelta
+from scraperModule import StudyRoomBooker
+from minheap import taskObj, taskMinHeap
+import logging, signal, sys
+import atexit, os
 import csv
-import scraperModule
 
 app = Flask(__name__)
-# TODO  
-# -Redis or RabbitMQ to be the redis broker
-# -Minheap to schedule new tasks that are valid from data file
-#  based on date of when the appointment is to be scheduled
-# -Connection between headless scraper module and flask form        
-app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+class StudyRoomScheduler:
+    def __init__(self):
+        self.mainBrowser = StudyRoomBooker()
+        self.username = ""
+        self.password = ""
+        self.ucfID = ""
+        self.taskHeap = taskMinHeap()
+        self.taskQueue = []
 
-celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-celery.conf.update(app.config)
+    def write_to_csv(self):
+        try:
+            with open("data.txt", 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([f'{self.username}', f'{self.password}', f'{self.ucfID}'])
+                writer.writerow(['Jobs:'])
+                writer.writerow(['date', 'start_time', 'duration', 'reservationType', 'room_option', 'room_number', 'min_capacity'])
+                while not self.taskHeap.isEmpty():
+                    writer.writerow(self.taskHeap.extractMin().get_all_variables())
+        except Exception as e:
+            logging.error(f"Failed to dump data to txt: {e}")
 
-username = ""
-password = ""
-ucfID = ""
-tasks = []
+    def save_data_on_shutdown(self):
+        self.mainBrowser.close()
+        self.write_to_csv()
 
-# def load_tasks():
-#     with open('tasks.txt', 'r') as file:
-#         for line in file:
-#             task_data = line.strip().split(',')
-#             task_name = task_data[0]
-#             task_schedule = datetime.datetime.strptime(task_data[1], '%Y-%m-%d %H:%M:%S')
-#             task_data = task_data[2]
-#             schedule_task.apply_async(args=[task_name, task_data], eta=task_schedule)
-
-# @celery.task
-# def schedule_task(task_name, task_data):
-#     # Your task code here
-#     print(f"Executing task '{task_name}' with data: {task_data}")
-@app.route('/task_enqueue', methods=['POST'])
-def valid_task():
-    username = request.form.get('input1')
-    password = request.form.get('input2')
-    start_time = request.form.get('input4')
-    duration = request.form.get('input5')
-    reservationType = request.form.get('input6') 
-    min_capacity = request.form.get('input7')
-    room_option = request.form.get('room-option')
-    min_capacity = request.form.get('input8')
-    ucfID = request.form.get('input9')
+    def schedule_Task(self, username, password, ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity):
+        input_date = datetime.strptime(date, '%Y-%m-%d')
+        current_date = datetime.now()
+        date_difference = input_date - current_date
+        if date_difference >= timedelta(days=7):
+            newTask = taskObj(date, start_time, duration, reservationType, room_option, room_number, min_capacity)
+            self.taskHeap.insert(newTask)
+        else:
+            if reservationType == "group":
+                room_number = self.mainBrowser.rand_room(room_option, min_capacity)
+            try:
+                self.mainBrowser.book_room(username, password, ucfID, date, room_number, start_time, duration)
+            except Exception as e:
+                # Log the error
+                logging.exception("An error occurred while scheduling the task: %s", str(e))
     
-    queueUp = False
-    date = request.form.get('input3')
-    input_date = datetime.strptime(date, '%Y-%m-%d')
-    current_date = datetime.now()
-    date_difference = input_date - current_date
-    # Check if the difference is greater than or equal to 7 days (a week)
-    if date_difference >= timedelta(days=7):
-        queueUp = True
-    return render_template('tester.html', username=username,password=password, start_time=start_time,
-                            duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
-                            date=date, room_option=room_option, ucfID = ucfID)
+    #Only to be called within enqueue task
+    def valid_task(self):
+        self.username = request.form.get('input1')
+        self.password = request.form.get('input2')
+        start_time = request.form.get('input4')
+        duration = request.form.get('input5')
+        reservationType = request.form.get('input6')
+        room_number = request.form.get('input7')
+        room_option = request.form.get('room-option')
+        min_capacity = request.form.get('input8')
+        self.ucfID = request.form.get('input9')
+        date = request.form.get('input3')
 
-def process_file():
-    global username,password,tasks,ucfID
-    with open('data.txt', 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if row:
-                if row[0] == 'Jobs:':
-                    break  # Stop reading when tasks section is encountered
-                username, password,ucfID = row
-                # Process username and password 
-            if len(row) == 4:
-                tasks.append(row)  # Store the task data
-    # Pass the tasks to Celery or perform any other required operations
-    for task in tasks:
-        time_task_was_queued, desired_schedule_date, time_of_reservation, duration_of_stay = task
-        # Process task (e.g., schedule the task with Celery)
+        #while the below is in progress I want to have a loading screen of sorts
+        self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity)
+        return redirect(url_for('completion_screen'))
+
+        # return render_template('tester.html', username=self.username, password=self.password, start_time=start_time,
+        #                         duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
+        #                         date=date, room_option=room_option, room_number=room_number,ucfID = self.ucfID)
+
+    def process_file(self):
+        tasks =[]
+        try:
+            with open('data.txt', 'r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row:
+                        if row[0] == 'Jobs:':
+                            break  # Stop reading when tasks section is encountered
+                        self.username, self.password, self.ucfID = row
+                    if len(row) == 7:
+                        tasks.append(row)  
+
+            for task in tasks:
+                date, start_time, duration, reservationType, room_option, room_number, min_capacity = task
+                current_date = datetime.now()
+                date_difference = datetime.strptime(date, '%Y-%m-%d') - current_date
+                if date_difference >= timedelta(days=7):
+                    newTask = taskObj(date, start_time, duration, reservationType, room_option, room_number, min_capacity)
+                    self.taskHeap.insert(newTask)
+                elif date_difference > 0: #check for past
+                    self.taskQueue.append(task)
+                    self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity)
+                else:
+                    logging.info(f"Previously Scheduled Task: {task} is invalid")
+
+        except Exception as e:
+            logging.error("An error occurred while processing the file: %s", str(e))
+
+
+scheduler = StudyRoomScheduler()
+
+def keyboard_interrupt_handler(signal, frame):
+    scheduler.mainBrowser.close()
+    os._exit(0)
+
+#ROUTES
+@app.route('/task_enqueue', methods=['POST'])
+def enqueue_task():
+    return scheduler.valid_task()
+
+@app.route('/completion')
+def completion_screen():
+    # Render the completion template
+    return render_template('completion.html')
 
 @app.route('/')
 def index():
-    process_file()
+    return render_template('index.html',username = scheduler.username, password = scheduler.password, ucfID = scheduler.ucfID)
 
-    #task_name = 'task3'
-    # task_schedule = datetime.datetime.now() + datetime.timedelta(seconds=10)
-    # task_data = 'task3_data'
-    # with open('tasks.txt', 'a') as file:
-    #     file.write(f"{task_name},{task_schedule.strftime('%Y-%m-%d %H:%M:%S')},{task_data}\n")
-    # schedule_task.apply_async(args=[task_name, task_data], eta=task_schedule)
-
-    return render_template('index.html',username = username, password = password, ucfID = ucfID)
-
+@app.route('/shutdown', methods=['POST'])
+def shutdown_server():
+    if request.method == 'POST':
+        scheduler.save_data_on_shutdown()
+        logging.info("Server Shutdown")
+        os._exit(0)
+    return "Server shutting down..."
+    
 if __name__ == '__main__':
-    # load_tasks()  # Load tasks from the file on Flask server startup
-    app.run(debug=True)
+    signal.signal(signal.SIGINT, keyboard_interrupt_handler)
+    logging.basicConfig(filename='app.log', level=logging.INFO,filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger('werkzeug')
+    handler = logging.StreamHandler()
+    logger.addHandler(handler)
+    
+    scheduler.process_file()
+    atexit.register(scheduler.save_data_on_shutdown)
+    try:
+        app.run(debug=True)
+    except KeyboardInterrupt:
+        print("\nKeyboard Interrupt (Ctrl + C) detected. Exiting now, this may take a minute...")

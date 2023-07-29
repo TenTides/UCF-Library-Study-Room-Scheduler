@@ -1,6 +1,3 @@
 username,password,UCFID
 Jobs:
-time_task_was_queued, desired_schedule_date, time_of_reservation, duration_of_stay
-time_task_was_queued, desired_schedule_date, time_of_reservation, duration_of_stay
-time_task_was_queued, desired_schedule_date, time_of_reservation, duration_of_stay
-time_task_was_queued, desired_schedule_date, time_of_reservation, duration_of_stay
+date,start_time,duration,reservationType,room_option,room_number,min_capacity

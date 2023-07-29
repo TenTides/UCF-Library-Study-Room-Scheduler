@@ -1,4 +1,47 @@
-class GenPurposeMinHeap:
+from datetime import datetime
+
+class taskObj:
+    def __init__(self,date, start_time, duration, reservationType, room_option, room_number, min_capacity):
+        self._date = datetime.strptime(date, '%Y-%m-%d')
+        self._start_time = start_time
+        self._duration = duration
+        self._reservationType = reservationType
+        self._room_number = room_number
+        self._room_option = room_option
+        self._min_capacity = min_capacity
+
+    def get_start_time(self):
+        return self._start_time
+    
+    def get_date(self):
+        return self._date
+    
+    def get_duration(self):
+        return self._duration
+
+    def get_reservation_type(self):
+        return self._reservationType
+
+    def get_room_number(self):
+        return self._room_number
+
+    def get_room_option(self):
+        return self._room_option
+
+    def get_min_capacity(self):
+        return self._min_capacity
+    
+    def get_all_variables(self):
+        return [
+            self._date,
+            self._start_time,
+            self._duration,
+            self._reservationType,
+            self._room_option,
+            self._room_number,
+            self._min_capacity
+        ]
+class taskMinHeap:
      
     def __init__(self):
         self.heap = []
@@ -8,6 +51,8 @@ class GenPurposeMinHeap:
         return self.heap[(index-1)//2]	
     
     def insert(self, element):
+        if not isinstance(element, taskObj):
+            raise ValueError("Only taskObj instances can be inserted into the taskMinHeap.")
         self.heap.append(element)
         self.size += 1
         self.percolateUp(len(self.heap)-1)
@@ -26,11 +71,11 @@ class GenPurposeMinHeap:
                 self.swap(min,index)
                 self.percolateDown(min)
         if self.size == (index*2+1):
-            if(self.heap[index*2+1] < self.heap[index]):
+            if(self.heap[index*2+1].get_date() < self.heap[index].get_date()):
                 self.swap(index*2+1,index)
             
     def minimum(self,a, indexa, b, indexb):
-        if (a < b):
+        if (a.get_date() < b.get_date()) :
             return indexa
         else:
             return indexb
