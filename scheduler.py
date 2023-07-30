@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime, timedelta
 from scraperModule import StudyRoomBooker
 from minheap import taskObj, taskMinHeap
+import webbrowser
 import logging, signal, sys
 import atexit, os
 import csv
@@ -98,7 +99,6 @@ class StudyRoomScheduler:
         except Exception as e:
             logging.error("An error occurred while processing the file: %s", str(e))
 
-
 scheduler = StudyRoomScheduler()
 
 def keyboard_interrupt_handler(signal, frame):
@@ -135,8 +135,12 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     
     scheduler.process_file()
-    atexit.register(scheduler.save_data_on_shutdown)
     try:
-        app.run(debug=True)
+        host = '127.0.0.1'  
+        port = 5000  
+        url = f'http://{host}:{port}/'
+        webbrowser.open(url) 
+        app.run(host=host, port=port, debug=True,use_reloader=False)
+        
     except KeyboardInterrupt:
-        print("\nKeyboard Interrupt (Ctrl + C) detected. Exiting now, this may take a minute...")
+       logging.info(f'Keyboard Interrupt (Ctrl + C) detected. Exiting now, this may take a minute...')

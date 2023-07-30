@@ -3,6 +3,7 @@
 <head>
     <title>Completion</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Task Completed!</h1>
@@ -10,8 +11,18 @@
     <form action="{{ url_for('index') }}" method="get">
         <button type="submit">Yes</button>
     </form>
-    <form action="{{ url_for('goodbye_screen') }}" method="get">
+    <form action="{{ url_for('shutdown_server') }}" method="get">
         <button type="submit">No</button>
     </form>
+    <script>
+        // Add event listener to detect tab closure
+        window.addEventListener('beforeunload', function() {
+            $.ajax({
+                type: 'POST',
+                url: '/shutdown',
+                async: true,   
+            });
+        });
+    </script>
 </body>
 </html>

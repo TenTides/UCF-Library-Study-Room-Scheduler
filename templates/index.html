@@ -3,6 +3,8 @@
 <head>
     <title>Library Reservation Form</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 </head>
 <body>
     <h1>Library Reservation Form</h1>
@@ -136,6 +138,13 @@
             }
             return true; // Allow form submission
         }
+        window.addEventListener('beforeunload', function() {
+            $.ajax({
+                type: 'POST',
+                url: '/shutdown', 
+                async: true,  
+            });
+        });
     </script>
 </body>
 </html>
