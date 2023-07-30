@@ -4,7 +4,6 @@
     <title>Library Reservation Form</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
 </head>
 <body>
     <h1>Library Reservation Form</h1>
@@ -68,7 +67,7 @@
         const roomTypeSelect = document.getElementById('input6');
         const roomSelectionDiv = document.getElementById('room-selection');
         const specificSelectionDiv = document.getElementById('specific-selection');
-        //Intial load 
+        
         roomSelectionDiv.style.display = 'none';
         specificSelectionDiv.style.display = 'block';
         // Show/hide room selection based on room type
