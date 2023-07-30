@@ -74,14 +74,10 @@ class StudyRoomScheduler:
         try:
             with open('data.txt', 'r') as file:
                 reader = csv.reader(file)
+                self.username, self.password, self.ucfID = next(reader)
                 for row in reader:
-                    if row:
-                        if row[0] == 'Jobs:':
-                            break  # Stop reading when tasks section is encountered
-                        self.username, self.password, self.ucfID = row
                     if len(row) == 7:
                         tasks.append(row)  
-
             for task in tasks:
                 date, start_time, duration, reservationType, room_option, room_number, min_capacity = task
                 current_date = datetime.now()
