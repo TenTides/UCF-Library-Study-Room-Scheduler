@@ -3,8 +3,7 @@ from datetime import datetime, timedelta
 from scraperModule import StudyRoomBooker
 from minheap import taskObj, taskMinHeap
 import webbrowser
-import logging, signal, sys
-import atexit, os
+import logging, signal, os
 import csv
 
 app = Flask(__name__)
