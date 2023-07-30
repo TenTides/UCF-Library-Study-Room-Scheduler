@@ -101,6 +101,7 @@ class StudyRoomScheduler:
 scheduler = StudyRoomScheduler()
 
 def keyboard_interrupt_handler(signal, frame):
+    logging.info(f'Keyboard Interrupt (Ctrl + C) detected. Exiting now, this may take a minute...')
     scheduler.mainBrowser.close()
     os._exit(0)
 
@@ -134,12 +135,9 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     
     scheduler.process_file()
-    try:
-        host = '127.0.0.1'  
-        port = 5000  
-        url = f'http://{host}:{port}/'
-        webbrowser.open(url) 
-        app.run(host=host, port=port, debug=True,use_reloader=False)
-        
-    except KeyboardInterrupt:
-       logging.info(f'Keyboard Interrupt (Ctrl + C) detected. Exiting now, this may take a minute...')
+    host = '127.0.0.1'  
+    port = 5000  
+    url = f'http://{host}:{port}/'
+    webbrowser.open(url) 
+    app.run(host=host, port=port, debug=True,use_reloader=False)
+    
