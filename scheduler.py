@@ -6,7 +6,6 @@ import webbrowser
 import logging, signal, os
 import csv
 
-
 app = Flask(__name__)
 class StudyRoomScheduler:
     def __init__(self, booker):
@@ -63,6 +62,7 @@ class StudyRoomScheduler:
         date = request.form.get('input3')
 
         #while the below is in progress I want to have a loading screen of sorts
+        #print(self.mainBrowser.driver.session_id)
         if self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity):
             return redirect(url_for('completion_screen'))
         return render_template('tester.html', username=self.username, password=self.password, start_time=start_time,
