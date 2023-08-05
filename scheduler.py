@@ -6,6 +6,7 @@ import webbrowser
 import logging, signal, os
 import csv
 
+
 app = Flask(__name__)
 class StudyRoomScheduler:
     def __init__(self, booker):
