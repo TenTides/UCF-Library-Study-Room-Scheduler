@@ -8,8 +8,8 @@ import csv
 
 app = Flask(__name__)
 class StudyRoomScheduler:
-    def __init__(self):
-        self.mainBrowser = StudyRoomBooker()
+    def __init__(self, booker):
+        self.mainBrowser = booker # <-- class creates the driver in the init
         self.username = ""
         self.password = "password"
         self.ucfID = ""
@@ -20,7 +20,7 @@ class StudyRoomScheduler:
         try:
             with open("data.txt", 'w', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow([f'{self.username}', f'{self.password}', f'{self.ucfID}'])
+                writer.writerow([f'{self.username}', f'{self.ucfID}'])
                 writer.writerow(['Jobs:'])
                 writer.writerow(['date', 'start_time', 'duration', 'reservationType', 'room_option', 'room_number', 'min_capacity'])
                 while not self.taskHeap.isEmpty():
@@ -62,12 +62,11 @@ class StudyRoomScheduler:
         date = request.form.get('input3')
 
         #while the below is in progress I want to have a loading screen of sorts
-        self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity)
-        return redirect(url_for('completion_screen'))
-
-        # return render_template('tester.html', username=self.username, password=self.password, start_time=start_time,
-        #                         duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
-        #                         date=date, room_option=room_option, room_number=room_number,ucfID = self.ucfID)
+        if self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity):
+            return redirect(url_for('completion_screen'))
+        return render_template('tester.html', username=self.username, password=self.password, start_time=start_time,
+                                duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
+                                 date=date, room_option=room_option, room_number=room_number,ucfID = self.ucfID)
 
     def process_file(self):
         tasks =[]
@@ -75,6 +74,8 @@ class StudyRoomScheduler:
             with open('data.txt', 'r') as file:
                 reader = csv.reader(file)
                 self.username, self.ucfID = next(reader)
+                next(reader)
+                next(reader)
                 for row in reader:
                     if len(row) == 7:
                         tasks.append(row)  
@@ -94,7 +95,7 @@ class StudyRoomScheduler:
         except Exception as e:
             logging.error("An error occurred while processing the file: %s", str(e))
 
-scheduler = StudyRoomScheduler()
+scheduler = StudyRoomScheduler(booker=StudyRoomBooker())
 
 def keyboard_interrupt_handler(signal, frame):
     logging.info(f'Keyboard Interrupt (Ctrl + C) detected. Exiting now, this may take a minute...')
@@ -135,5 +136,5 @@ if __name__ == '__main__':
     port = 5000  
     url = f'http://{host}:{port}/'
     webbrowser.open(url) 
-    app.run(host=host, port=port, debug=True,use_reloader=False)
+    app.run(host=host, port=port, debug=False, use_reloader=False)
     

@@ -14,7 +14,7 @@ class StudyRoomBooker:
         self.service = Service(executable_path=r"./chromedriver/chromedriver.exe")
         self.options = webdriver.ChromeOptions()
         self.options.add_experimental_option("detach", True)
-        self.options.add_argument('--headless')
+        #self.options.add_argument('--headless')
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
         self.driver.get("https://ucf.libcal.com/reserve/generalstudyroom")
 
@@ -146,11 +146,14 @@ class StudyRoomBooker:
         return True
 
     def book_room(self,username,password,UCFID,date, room, startTime, duration):
-        self.date_change(self, date)
-        self.start_timeCheck(self, room, startTime)
-        self.select_durationCheck(self,duration)
-        self.login_sequence(self, username, password)
-        self.confirm_booking(self,UCFID)
+        print(date)
+        self.date_change(date)
+        # print("pass 1")
+        # self.start_timeCheck(room, startTime)
+        # self.select_durationCheck(duration)
+        # self.login_sequence(username, password)
+        # self.confirm_booking(UCFID)
+        return True
 
     # Returns the room with the greatest positive capacity difference then the user specified mincapacity   
     def rand_room(self, room_group, min_capacity):
@@ -223,5 +226,5 @@ class StudyRoomBooker:
 
 if __name__ == "__main__": # only executed when run directly from scraperModule.py
     booker = StudyRoomBooker()
-    booker.date_change("2023-07-22")
+    booker.date_change("2023-08-7")
     booker.close()
