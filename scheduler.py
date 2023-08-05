@@ -11,7 +11,7 @@ class StudyRoomScheduler:
     def __init__(self):
         self.mainBrowser = StudyRoomBooker()
         self.username = ""
-        self.password = ""
+        self.password = "password"
         self.ucfID = ""
         self.taskHeap = taskMinHeap()
         self.taskQueue = []
@@ -74,7 +74,7 @@ class StudyRoomScheduler:
         try:
             with open('data.txt', 'r') as file:
                 reader = csv.reader(file)
-                self.username, self.password, self.ucfID = next(reader)
+                self.username, self.ucfID = next(reader)
                 for row in reader:
                     if len(row) == 7:
                         tasks.append(row)  
