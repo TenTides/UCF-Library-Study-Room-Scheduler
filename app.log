@@ -1,10 +1,11 @@
-2023-08-05 16:26:31,585 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+2023-08-05 19:05:12,172 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on http://127.0.0.1:5000
-2023-08-05 16:26:31,585 - INFO - [33mPress CTRL+C to quit[0m
-2023-08-05 16:26:31,736 - INFO - 127.0.0.1 - - [05/Aug/2023 16:26:31] "GET / HTTP/1.1" 200 -
-2023-08-05 16:26:31,778 - INFO - 127.0.0.1 - - [05/Aug/2023 16:26:31] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
-2023-08-05 16:26:45,214 - WARNING - Connection pool is full, discarding connection: localhost. Connection pool size: 1
-2023-08-05 16:26:45,214 - ERROR - An error occurred while scheduling the task: Message: invalid session id
+2023-08-05 19:05:12,173 - INFO - [33mPress CTRL+C to quit[0m
+2023-08-05 19:05:17,883 - INFO - 127.0.0.1 - - [05/Aug/2023 19:05:17] "GET / HTTP/1.1" 200 -
+2023-08-05 19:05:17,927 - INFO - 127.0.0.1 - - [05/Aug/2023 19:05:17] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2023-08-05 19:05:18,038 - INFO - 127.0.0.1 - - [05/Aug/2023 19:05:18] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2023-08-05 19:05:31,668 - WARNING - Connection pool is full, discarding connection: localhost. Connection pool size: 1
+2023-08-05 19:05:31,669 - ERROR - An error occurred while scheduling the task: Message: invalid session id
 Stacktrace:
 Backtrace:
 	GetHandleVerifier [0x00007FF6837E4A62+57106]
@@ -23,7 +24,7 @@ Backtrace:
 	BaseThreadInitThunk [0x00007FF8F6CC26AD+29]
 	RtlUserThreadStart [0x00007FF8F8B8AA68+40]
 Traceback (most recent call last):
-  File "c:\Users\tyler\Desktop\Projects And More\Projects\Python\Library Scheduler\scheduler.py", line 51, in schedule_Task
+  File "c:\Users\tyler\Desktop\Projects And More\Projects\Python\Library Scheduler\scheduler.py", line 47, in schedule_Task
     self.mainBrowser.book_room(username, password, ucfID, date, room_number, start_time, duration)
   File "c:\Users\tyler\Desktop\Projects And More\Projects\Python\Library Scheduler\scraperModule.py", line 150, in book_room
     self.date_change(date)
@@ -59,5 +60,5 @@ Backtrace:
 	BaseThreadInitThunk [0x00007FF8F6CC26AD+29]
 	RtlUserThreadStart [0x00007FF8F8B8AA68+40]
 
-2023-08-05 16:26:45,220 - INFO - 127.0.0.1 - - [05/Aug/2023 16:26:45] "POST /task_enqueue HTTP/1.1" 200 -
-2023-08-05 16:26:47,229 - INFO - Server Shutdown
+2023-08-05 19:05:31,671 - INFO - 127.0.0.1 - - [05/Aug/2023 19:05:31] "POST /task_enqueue HTTP/1.1" 200 -
+2023-08-05 19:05:33,697 - INFO - Server Shutdown
