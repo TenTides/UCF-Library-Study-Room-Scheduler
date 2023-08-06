@@ -13,7 +13,7 @@ class StudyRoomBooker:
         self.service = Service(executable_path=r"./chromedriver/chromedriver.exe")
         self.options = webdriver.ChromeOptions()
         self.options.add_experimental_option("detach", True)
-        self.options.add_argument('--headless')
+        #self.options.add_argument('--headless')
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
         self.driver.get("https://ucf.libcal.com/reserve/generalstudyroom")
 

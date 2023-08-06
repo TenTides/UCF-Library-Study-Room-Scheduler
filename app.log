@@ -1,11 +1,6 @@
-2023-08-06 12:32:34,359 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+2023-08-06 13:36:23,917 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on http://127.0.0.1:5000
-2023-08-06 12:32:34,359 - INFO - [33mPress CTRL+C to quit[0m
-2023-08-06 12:32:34,517 - INFO - 127.0.0.1 - - [06/Aug/2023 12:32:34] "GET / HTTP/1.1" 200 -
-2023-08-06 12:32:34,563 - INFO - 127.0.0.1 - - [06/Aug/2023 12:32:34] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
-2023-08-06 12:32:46,253 - INFO - 127.0.0.1 - - [06/Aug/2023 12:32:46] "[32mPOST /task_enqueue HTTP/1.1[0m" 302 -
-2023-08-06 12:32:46,267 - INFO - 127.0.0.1 - - [06/Aug/2023 12:32:46] "GET /completion HTTP/1.1" 200 -
-2023-08-06 12:32:46,284 - INFO - 127.0.0.1 - - [06/Aug/2023 12:32:46] "GET /static/css/completion.css HTTP/1.1" 200 -
-2023-08-06 12:32:47,970 - INFO - 127.0.0.1 - - [06/Aug/2023 12:32:47] "GET / HTTP/1.1" 200 -
-2023-08-06 12:32:47,988 - INFO - 127.0.0.1 - - [06/Aug/2023 12:32:47] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
-2023-08-06 12:32:48,380 - INFO - Server Shutdown
+2023-08-06 13:36:23,918 - INFO - [33mPress CTRL+C to quit[0m
+2023-08-06 13:36:24,078 - INFO - 127.0.0.1 - - [06/Aug/2023 13:36:24] "GET / HTTP/1.1" 200 -
+2023-08-06 13:36:24,120 - INFO - 127.0.0.1 - - [06/Aug/2023 13:36:24] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2023-08-06 13:36:27,903 - INFO - Server Shutdown
