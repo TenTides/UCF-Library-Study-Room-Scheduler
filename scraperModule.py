@@ -146,9 +146,7 @@ class StudyRoomBooker:
         return True
 
     def book_room(self,username,password,UCFID,date, room, startTime, duration):
-        #print(date)
         self.date_change(date)
-        # print("pass 1")
         # self.start_timeCheck(room, startTime)
         # self.select_durationCheck(duration)
         # self.login_sequence(username, password)

@@ -2,26 +2,35 @@
 <html>
 <head>
     <title>Completion</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/completion.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Task Completed!</h1>
     <p>Would you like to reserve another room?</p>
-    <form action="{{ url_for('index') }}" method="get">
+    <form id="reserveForm" action="{{ url_for('index') }}" method="get">
         <button type="submit">Yes</button>
     </form>
-    <form action="{{ url_for('shutdown_server') }}" method="get">
+    <form id="shutdownForm" action="{{ url_for('shutdown_server') }}" method="get">
         <button type="submit">No</button>
     </form>
     <script>
+        let shutdownRequested = false;
+
         window.addEventListener('beforeunload', function() {
-            $.ajax({
-                type: 'POST',
-                url: '/shutdown',
-                async: true,   
-            });
+            if (shutdownRequested) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/shutdown',
+                    async: true,   
+                });
+            }
         });
+
+        $('#shutdownForm').submit(function(event) {
+            shutdownRequested = true;
+        });
+
     </script>
 </body>
 </html>

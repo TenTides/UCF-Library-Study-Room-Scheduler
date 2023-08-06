@@ -65,9 +65,10 @@ class StudyRoomScheduler:
         #print(self.mainBrowser.driver.session_id)
         # if self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity):
         #     return redirect(url_for('completion_screen'))
-        return render_template('tester.html', username=self.username, password=self.password, start_time=start_time,
-                                duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
-                                 date=date, room_option=room_option, room_number=room_number,ucfID = self.ucfID)
+        # return render_template('tester.html', username=self.username, password=self.password, start_time=start_time,
+        #                         duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
+        #                          date=date, room_option=room_option, room_number=room_number,ucfID = self.ucfID)
+        return redirect(url_for('completion_screen'))
 
     def process_file(self):
         tasks =[]

@@ -137,7 +137,7 @@
             }
             return true; // Allow form submission
         }
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', function() { // careful as this triggers on redirects
             $.ajax({
                 type: 'POST',
                 url: '/shutdown', 
