@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+import time
 
 class StudyRoomBooker:
     def __init__(self):
@@ -12,7 +13,7 @@ class StudyRoomBooker:
         self.service = Service(executable_path=r"./chromedriver/chromedriver.exe")
         self.options = webdriver.ChromeOptions()
         self.options.add_experimental_option("detach", True)
-        #self.options.add_argument('--headless')
+        self.options.add_argument('--headless')
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
         self.driver.get("https://ucf.libcal.com/reserve/generalstudyroom")
 
@@ -132,13 +133,14 @@ class StudyRoomBooker:
             return True
         
     def select_durationCheck(self, duration):
-        selsect_elementPath = '//*[@id="bookingend_1"]'
+        selsect_elementPath = '//html/body/div[4]/main/div/div/div/div[5]/form/fieldset/div[1]/div/div/div/div/select'
         select_element = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, selsect_elementPath)))
         self.driver.execute_script("arguments[0].scrollIntoView();", select_element)
         select = Select(select_element)
 
         try:
             select.select_by_index(int(duration*2-1))
+            time.sleep(2)
         except Exception as e: # can be circumvented if an additional parameter is addded to the html that takes 
             return False       # a strict val boolean, which autofills for the closest possible appointment at that start time
         return True
@@ -170,8 +172,8 @@ class StudyRoomBooker:
             submit_dXpath = '//*[@id="submit_times"]'
             button1 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_dXpath)))
             self.driver.execute_script("arguments[0].scrollIntoView();", button1)
-            self.safe_click(submit_dXpath)
-            
+            self.safe_click(button1)
+            self.driver.implicitly_wait(3)
             username_input = self.driver.find_element(By.ID,"userNameInput")
             password_input = self.driver.find_element(By.ID,"passwordInput")
             # Enter the username and password using send_keys method
@@ -182,7 +184,7 @@ class StudyRoomBooker:
             submit_pXpath = '//*[@id="submitButton"]'
             button2 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_pXpath)))
             self.driver.execute_script("arguments[0].scrollIntoView();", button2)
-            self.safe_click(submit_pXpath)
+            self.safe_click(button2)
             self.logged_in = True
 
     def confirm_booking(self,UCFID):
@@ -192,7 +194,7 @@ class StudyRoomBooker:
             submit_fXpath  = '//*[@id="terms_accept"]'
             button3 = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, submit_fXpath)))
             self.driver.execute_script("arguments[0].scrollIntoView();", button3)
-            self.safe_click(submit_fXpath)
+            self.safe_click(button3)
         except Exception as e:
             return "Incorrect Username or Password"
 
@@ -225,4 +227,8 @@ class StudyRoomBooker:
 if __name__ == "__main__": # only executed when run directly from scraperModule.py
     booker = StudyRoomBooker()
     booker.date_change("2023-08-7")
+    booker.start_timeCheck("178","11:30")
+    booker.select_durationCheck(4)
+    booker.login_sequence("ty068421", "")
+    booker.confirm_booking(5408209)
     booker.close()

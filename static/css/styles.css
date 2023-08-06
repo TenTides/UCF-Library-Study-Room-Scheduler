@@ -34,6 +34,7 @@ input[type="password"],
 input[type="number"],
 input[type="date"],
 input[type="time"],
+input[type="button"],
 select {
   width: 100%;
   padding: 10px;
