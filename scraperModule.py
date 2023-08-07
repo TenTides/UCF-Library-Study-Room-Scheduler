@@ -13,7 +13,7 @@ class StudyRoomBooker:
         self.service = Service(executable_path=r"./chromedriver/chromedriver.exe")
         self.options = webdriver.ChromeOptions()
         self.options.add_experimental_option("detach", True)
-        #self.options.add_argument('--headless')
+        self.options.add_argument('--headless')
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
         self.driver.get("https://ucf.libcal.com/reserve/generalstudyroom")
 
@@ -137,23 +137,23 @@ class StudyRoomBooker:
         select_element = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, selsect_elementPath)))
         self.driver.execute_script("arguments[0].scrollIntoView();", select_element)
         select = Select(select_element)
-
         try:
             select.select_by_index(int(duration*2-1))
-            time.sleep(2)
+            time.sleep(3)
         except Exception as e: # can be circumvented if an additional parameter is addded to the html that takes 
             return False       # a strict val boolean, which autofills for the closest possible appointment at that start time
         return True
 
     def book_room(self,username,password,UCFID,date, room, startTime, duration):
         self.date_change(date)
-        # self.start_timeCheck(room, startTime)
-        # self.select_durationCheck(duration)
-        # self.login_sequence(username, password)
-        # self.confirm_booking(UCFID)
+        self.start_timeCheck(room, startTime)
+        self.select_durationCheck(duration)
+        self.login_sequence(username, password)
+        self.confirm_booking(UCFID)
         return True
 
-    # Returns the room with the greatest positive capacity difference then the user specified mincapacity   
+    # Returns the room with the greatest positive capacity difference then the user specified mincapacity
+    @staticmethod
     def rand_room(self, room_group, min_capacity):
         roomGroupDict = self.rooms[int(room_group[0]) // 2]
         chosenRoom = "NULL"
@@ -224,7 +224,7 @@ class StudyRoomBooker:
 
 if __name__ == "__main__": # only executed when run directly from scraperModule.py
     booker = StudyRoomBooker()
-    booker.date_change("2023-08-7")
+    booker.date_change("2023-08-8")
     booker.start_timeCheck("178","11:30")
     booker.select_durationCheck(4)
     booker.login_sequence("ty068421", "")

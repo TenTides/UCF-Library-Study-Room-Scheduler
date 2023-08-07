@@ -8,14 +8,13 @@ import csv
 
 app = Flask(__name__)
 class StudyRoomScheduler:
-    def __init__(self, booker):
-        self.mainBrowser = booker # <-- class creates the driver in the init
+    def __init__(self):
         self.username = ""
         self.password = "password"
         self.ucfID = ""
         self.taskHeap = taskMinHeap()
         self.taskQueue = []
-
+        
     def write_to_csv(self):
         try:
             with open("data.txt", 'w', newline='') as file:
@@ -29,7 +28,6 @@ class StudyRoomScheduler:
             logging.error(f"Failed to dump data to txt: {e}")
 
     def save_data_on_shutdown(self):
-        self.mainBrowser.close()
         self.write_to_csv()
 
     def schedule_Task(self, username, password, ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity):
@@ -37,16 +35,20 @@ class StudyRoomScheduler:
         current_date = datetime.now()
         date_difference = input_date - current_date
         if date_difference >= timedelta(days=7):
-            newTask = taskObj(date, start_time, duration, reservationType, room_option, room_number, min_capacity)
+            newTask = taskObj(date, start_time, int(duration), reservationType, room_option, room_number, min_capacity)
             self.taskHeap.insert(newTask)
         else:
             if reservationType == "group":
-                room_number = self.mainBrowser.rand_room(room_option, min_capacity)
+                room_number = StudyRoomBooker.rand_room(room_option, min_capacity)
             try:
-                self.mainBrowser.book_room(username, password, ucfID, date, room_number, start_time, duration)
+                mainBrowser = StudyRoomBooker()
+                mainBrowser.book_room(username, password, ucfID, date, room_number, start_time, int(duration))
+                mainBrowser.close()
             except Exception as e:
                 # Log the error
                 logging.exception("An error occurred while scheduling the task: %s", str(e))
+                return False
+        return True
     
     #Only to be called within enqueue task
     def valid_task(self):
@@ -63,12 +65,11 @@ class StudyRoomScheduler:
 
         #while the below is in progress I want to have a loading screen of sorts
         #print(self.mainBrowser.driver.session_id)
-        # if self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity):
-        #     return redirect(url_for('completion_screen'))
+        if self.schedule_Task(self.username, self.password, self.ucfID, date, start_time, duration, reservationType, room_option, room_number, min_capacity):
+            return redirect(url_for('completion_screen'))
         return render_template('tester.html', username=self.username, password=self.password, start_time=start_time,
                                 duration=duration,reservation_type=reservationType, min_capacity=min_capacity,
                                  date=date, room_option=room_option, room_number=room_number,ucfID = self.ucfID)
-        #return redirect(url_for('completion_screen'))
 
     def process_file(self):
         tasks =[]
@@ -97,11 +98,11 @@ class StudyRoomScheduler:
         except Exception as e:
             logging.error("An error occurred while processing the file: %s", str(e))
 
-scheduler = StudyRoomScheduler(booker=StudyRoomBooker())
+scheduler = StudyRoomScheduler()
 
 def keyboard_interrupt_handler(signal, frame):
     logging.info(f'Keyboard Interrupt (Ctrl + C) detected. Exiting now, this may take a minute...')
-    scheduler.mainBrowser.close()
+    scheduler.save_data_on_shutdown()
     os._exit(0)
 
 #ROUTES
